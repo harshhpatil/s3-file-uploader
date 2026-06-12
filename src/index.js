@@ -7,6 +7,9 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 const app = express();
 app.use(express.json());
 
+// importing the middleware
+import { rateLimiter } from "./middleware/rateLimiter.middleware.js";
+
 // initialising the s3 client
 if (
   !process.env.AWS_REGION ||
@@ -32,7 +35,7 @@ const upload = multer({
 });
 
 // endpoint to handle file uploads
-app.post("/upload", upload.single("file"), async (req, res) => {
+app.post("/upload", rateLimiter, upload.single("file"), async (req, res) => {
   try {
     // returning error if no files are uploaded
     if (!req.file) {
